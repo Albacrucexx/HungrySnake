@@ -83,6 +83,11 @@ public class EjerPrueba extends JFrame {
 
         @Override
         public void keyReleased(KeyEvent e) {}
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+        }
     }
 
     public static void main(String[] args) {
