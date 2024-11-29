@@ -55,12 +55,18 @@ public class ConfiguracionJuego extends JFrame {
         iniciarButton.addActionListener(e -> {
             String nombreJugador1 = textJugador1.getText();
             String nombreJugador2 = textJugador2.getText();
-            String color1 = (String) comboColor1.getSelectedItem();
-            String color2 = (String) comboColor2.getSelectedItem();
+            Color color1 = convertirColor((String) comboColor1.getSelectedItem());
+            Color color2 = convertirColor((String) comboColor2.getSelectedItem());
             String dificultad = (String) comboDificultad.getSelectedItem();
 
             // Iniciar el juego según la configuración
-            new PanelJuego(nombreJugador1, color1, dificultad, nombreJugador2, color2, modoDosJugadores);
+            JFrame juego = new JFrame("Snake Game");
+            PanelJuego panelJuego = new PanelJuego(modoDosJugadores, color1, color2);
+            juego.add(panelJuego);
+            juego.setSize(800, 600);
+            juego.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            juego.setVisible(true);
+
             dispose();
         });
 
@@ -68,5 +74,18 @@ public class ConfiguracionJuego extends JFrame {
         add(iniciarButton, BorderLayout.SOUTH);
 
         setVisible(true);
+    }
+
+    private Color convertirColor(String colorSeleccionado) {
+        switch (colorSeleccionado.toLowerCase()) {
+            case "rojo":
+                return Color.RED;
+            case "azul":
+                return Color.BLUE;
+            case "amarillo":
+                return Color.YELLOW;
+            default:
+                return Color.GREEN; // Predeterminado: Verde
+        }
     }
 }

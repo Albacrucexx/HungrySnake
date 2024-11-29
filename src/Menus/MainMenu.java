@@ -80,11 +80,11 @@ public class MainMenu extends JPanel {
     // Función para iniciar el juego
     private void iniciarJuego() {
         String nombreJugador1 = JOptionPane.showInputDialog("Ingrese el nombre del Jugador 1:");
-        String colorJugador1 = JOptionPane.showInputDialog("Ingrese el color de la serpiente (ejemplo: Verde):");
-        String dificultad = JOptionPane.showInputDialog("Seleccione la dificultad (Fácil, Media, Difícil):");
+        String colorJugador1Str = JOptionPane.showInputDialog("Ingrese el color de la serpiente (ejemplo: Verde):");
+        Color colorJugador1 = obtenerColor(colorJugador1Str);
 
         // Crear y cambiar al panel de juego en vez de abrir una nueva ventana
-        PanelJuego panelJuego = new PanelJuego(nombreJugador1, colorJugador1, dificultad, "Jugador 2", "Amarillo", false);
+        PanelJuego panelJuego = new PanelJuego(false, colorJugador1, Color.YELLOW); // Color fijo para la máquina
         panelPrincipal.add(panelJuego, "PanelJuego");
         cardLayout.show(panelPrincipal, "PanelJuego");
     }
@@ -110,16 +110,37 @@ public class MainMenu extends JPanel {
     // Función para iniciar el juego en modo dos jugadores
     private void iniciarJuegoDosJugadores() {
         String nombreJugador1 = JOptionPane.showInputDialog("Ingrese el nombre del Jugador 1:");
-        String colorJugador1 = JOptionPane.showInputDialog("Ingrese el color de la serpiente 1:");
+        String colorJugador1Str = JOptionPane.showInputDialog("Ingrese el color de la serpiente 1:");
+        Color colorJugador1 = obtenerColor(colorJugador1Str);
+
         String nombreJugador2 = JOptionPane.showInputDialog("Ingrese el nombre del Jugador 2:");
-        String colorJugador2 = JOptionPane.showInputDialog("Ingrese el color de la serpiente 2:");
-        String dificultad = JOptionPane.showInputDialog("Seleccione la dificultad (Fácil, Media, Difícil):");
+        String colorJugador2Str = JOptionPane.showInputDialog("Ingrese el color de la serpiente 2:");
+        Color colorJugador2 = obtenerColor(colorJugador2Str);
 
         // Crear y cambiar al panel de juego en modo dos jugadores
-        PanelJuego panelJuego = new PanelJuego(nombreJugador1, colorJugador1, dificultad, nombreJugador2, colorJugador2, true);
+        PanelJuego panelJuego = new PanelJuego(true, colorJugador1, colorJugador2);
         panelPrincipal.add(panelJuego, "PanelJuego");
         cardLayout.show(panelPrincipal, "PanelJuego");
     }
+
+    // Método para convertir un string a un Color
+    private Color obtenerColor(String colorStr) {
+        switch (colorStr.toLowerCase()) {
+            case "rojo":
+                return Color.RED;
+            case "verde":
+                return Color.GREEN;
+            case "azul":
+                return Color.BLUE;
+            case "amarillo":
+                return Color.YELLOW;
+            case "naranja":
+                return Color.ORANGE;
+            case "rosado":
+                return Color.PINK;
+            default:
+                JOptionPane.showMessageDialog(null, "Color no reconocido, usando negro por defecto.");
+                return Color.BLACK;
+        }
+    }
 }
-
-

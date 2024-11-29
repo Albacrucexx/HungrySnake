@@ -5,11 +5,14 @@ import Principales.VentanaPrincipal;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class MenuPrincipal extends JPanel {
 
+    private VentanaPrincipal ventanaPrincipal; // Referencia a la ventana principal
+
     public MenuPrincipal(VentanaPrincipal ventanaPrincipal) {
+        this.ventanaPrincipal = ventanaPrincipal; // Guardar la referencia
+
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS)); // Apila los botones verticalmente
         setBackground(Color.BLACK); // Fondo negro
 
@@ -21,40 +24,11 @@ public class MenuPrincipal extends JPanel {
         JButton btnSalir = crearBoton("Salir");
 
         // Configurar acciones de los botones
-        btnUnJugador.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ventanaPrincipal.mostrarJuego("Un Jugador"); // Llamar a la función para mostrar el juego de 1 jugador
-            }
-        });
-
-        btnDosJugadores.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ventanaPrincipal.mostrarJuego("Dos Jugadores"); // Llamar a la función para mostrar el juego de 2 jugadores
-            }
-        });
-
-        btnMisiones.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Implementar navegación hacia el menú de misiones
-            }
-        });
-
-        btnPuntuaciones.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Implementar navegación hacia el menú de puntuaciones
-            }
-        });
-
-        btnSalir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0); // Cierra el programa
-            }
-        });
+        btnUnJugador.addActionListener(e -> mostrarVentanaUnJugador());
+        btnDosJugadores.addActionListener(e -> mostrarVentanaDosJugadores());
+        btnMisiones.addActionListener(e -> mostrarVentanaMisiones());
+        btnPuntuaciones.addActionListener(e -> mostrarVentanaPuntuaciones());
+        btnSalir.addActionListener(e -> System.exit(0)); // Cierra el programa
 
         // Añadir botones al panel
         add(Box.createVerticalGlue()); // Espacio flexible arriba
@@ -70,8 +44,6 @@ public class MenuPrincipal extends JPanel {
         add(Box.createVerticalGlue()); // Espacio flexible abajo
     }
 
-
-
     private JButton crearBoton(String texto) {
         JButton boton = new JButton(texto);
         boton.setAlignmentX(Component.CENTER_ALIGNMENT); // Centrar horizontalmente
@@ -80,8 +52,38 @@ public class MenuPrincipal extends JPanel {
         boton.setFont(new Font("Arial", Font.BOLD, 16)); // Fuente personalizada
         return boton;
     }
+
+    private void mostrarVentanaUnJugador() {
+        // Crear y mostrar la configuración para un jugador
+        JFrame ventana = new JFrame("Configuración - Un Jugador");
+        ventana.setSize(400, 300);
+        ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        ventana.add(new MenuConfiguracionUnJugador(ventanaPrincipal)); // Pasar referencia
+        ventana.setVisible(true);
+    }
+
+    private void mostrarVentanaDosJugadores() {
+        // Crear y mostrar la configuración para dos jugadores
+        JFrame ventana = new JFrame("Configuración - Dos Jugadores");
+        ventana.setSize(400, 300);
+        ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        ventana.add(new MenuConfiguracionDosJugadores(ventanaPrincipal)); // Pasar referencia
+        ventana.setVisible(true);
+    }
+
+    private void mostrarVentanaMisiones() {
+        JFrame ventana = new JFrame("Misiones");
+        ventana.setSize(400, 400);
+        ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        ventana.add(new MenuMisiones());
+        ventana.setVisible(true);
+    }
+
+    private void mostrarVentanaPuntuaciones() {
+        JFrame ventana = new JFrame("Puntuaciones");
+        ventana.setSize(400, 400);
+        ventana.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        ventana.add(new MenuPuntuaciones());
+        ventana.setVisible(true);
+    }
 }
-
-
-
-

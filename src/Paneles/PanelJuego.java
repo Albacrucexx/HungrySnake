@@ -2,161 +2,159 @@ package Paneles;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class PanelJuego extends JPanel implements ActionListener, KeyListener {
-    private Timer timer;
-    private final int DELAY = 150;
-    private int contadorInicial = 3;
-
+public class PanelJuego extends JPanel implements KeyListener, ActionListener {
     private ArrayList<Point> serpiente1;
     private ArrayList<Point> serpiente2;
-    private Point manzana;
     private ArrayList<Point> obstaculos;
-    private String direccion1 = "D";
-    private String direccion2 = "K";
+    private Point manzana;
+
+    private int puntuacion1, puntuacion2;
     private boolean jugando = false;
-    private boolean dosJugadores = false;
+    private boolean dosJugadores;
 
-    private int puntuacion1 = 0;
-    private int puntuacion2 = 0;
+    private Color colorJugador1, colorJugador2;
 
-    // Configuración adicional
-    private String nombreJugador1;
-    private String nombreJugador2;
-    private Color colorJugador1 = Color.GREEN;
-    private Color colorJugador2 = Color.YELLOW;
-    private int vidas = 3; // Número inicial de vidas
+    private Timer timer;
+    private int delay = 150;
+    private int direccion1X = 1, direccion1Y = 0;
+    private int direccion2X = 0, direccion2Y = 0;
 
-    public PanelJuego(String nombreJugador1, String colorJugador1, String dificultad, String nombreJugador2, String colorJugador2, boolean modoDosJugadores) {
-        this.nombreJugador1 = nombreJugador1;
-        this.nombreJugador2 = nombreJugador2;
-        this.dosJugadores = modoDosJugadores;
+    private final int tableroAncho = 30;
+    private final int tableroAlto = 20;
 
-        // Usar el método obtenerColor para convertir los nombres de colores a objetos Color
-        this.colorJugador1 = obtenerColor(colorJugador1);
-        this.colorJugador2 = obtenerColor(colorJugador2);
+    public PanelJuego(boolean dosJugadores, Color colorJugador1, Color colorJugador2) {
+        this.dosJugadores = dosJugadores;
+        this.colorJugador1 = colorJugador1;
+        this.colorJugador2 = colorJugador2;
 
-        setFocusable(true);
-        setBackground(Color.BLACK);
-        setPreferredSize(new Dimension(800, 600));
+        this.serpiente1 = new ArrayList<>();
+        this.serpiente2 = new ArrayList<>();
+        this.obstaculos = new ArrayList<>();
+
+        inicializarJuego();
+
         addKeyListener(this);
+        setFocusable(true);
 
-        iniciarJuego();
-    }
-
-    private Color obtenerColor(String color) {
-        switch (color.toUpperCase()) {
-            case "GREEN":
-                return Color.GREEN;
-            case "YELLOW":
-                return Color.YELLOW;
-            case "RED":
-                return Color.RED;
-            case "BLUE":
-                return Color.BLUE;
-            case "BLACK":
-                return Color.BLACK;
-            case "WHITE":
-                return Color.WHITE;
-            default:
-                return Color.GRAY; // Color por defecto si el color no es reconocido
-        }
-    }
-
-    public void iniciarJuego() {
-        serpiente1 = new ArrayList<>();
-        serpiente2 = new ArrayList<>();
-        obstaculos = new ArrayList<>();
-        generarManzana();
-
-        serpiente1.add(new Point(5, 5));
-        if (dosJugadores) {
-            serpiente2.add(new Point(10, 10));
-        }
-
-        timer = new Timer(DELAY, this);
+        timer = new Timer(delay, this);
         timer.start();
+    }
 
-        jugando = false;
-        contadorInicial = 3;
+    public void reiniciarJuego() {
+        inicializarJuego(); // Reiniciar el estado del juego
+        timer.restart();    // Reiniciar el temporizador
+        repaint();          // Redibujar el panel
+    }
 
-        new Thread(() -> {
-            try {
-                while (contadorInicial > 0) {
-                    repaint();
-                    Thread.sleep(1000);
-                    contadorInicial--;
-                }
-                jugando = true;
-                repaint();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+    private void inicializarJuego() {
+        serpiente1.clear();
+        serpiente1.add(new Point(5, 5));
+
+        if (dosJugadores) {
+            serpiente2.clear();
+            serpiente2.add(new Point(15, 5));
+        }
+
+        obstaculos.clear();
+        generarObstaculos(3); // Generar 3 obstáculos al azar
+
+        generarManzana();
+        puntuacion1 = 0;
+        puntuacion2 = 0;
+        jugando = true;
+    }
+
+    private void generarObstaculos(int cantidad) {
+        Random random = new Random();
+        for (int i = 0; i < cantidad; i++) {
+            Point nuevoObstaculo;
+            do {
+                nuevoObstaculo = new Point(random.nextInt(tableroAncho), random.nextInt(tableroAlto));
+            } while (colisionConSerpienteOObstaculo(nuevoObstaculo));
+            obstaculos.add(nuevoObstaculo);
+        }
     }
 
     private void generarManzana() {
         Random random = new Random();
-        int x, y;
         do {
-            x = random.nextInt(30); // Suponiendo un ancho de 30 celdas
-            y = random.nextInt(20); // Suponiendo un alto de 20 celdas
-            manzana = new Point(x, y);
+            manzana = new Point(random.nextInt(tableroAncho), random.nextInt(tableroAlto));
         } while (colisionConSerpienteOObstaculo(manzana));
     }
 
     private boolean colisionConSerpienteOObstaculo(Point punto) {
-        for (Point segmento : serpiente1) {
-            if (punto.equals(segmento)) {
-                return true;
-            }
-        }
-
-        if (dosJugadores) {
-            for (Point segmento : serpiente2) {
-                if (punto.equals(segmento)) {
-                    return true;
-                }
-            }
-        }
-
         for (Point obstaculo : obstaculos) {
-            if (punto.equals(obstaculo)) {
-                return true;
+            if (punto.equals(obstaculo)) return true;
+        }
+        for (Point parte : serpiente1) {
+            if (punto.equals(parte)) return true;
+        }
+        if (dosJugadores) {
+            for (Point parte : serpiente2) {
+                if (punto.equals(parte)) return true;
             }
         }
-
         return false;
     }
 
-    private void moverSerpientes() {
-        moverSerpiente(serpiente1, direccion1);
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        g.setColor(colorJugador1);
+        for (Point p : serpiente1) {
+            g.fillRect(p.x * 20, p.y * 20, 20, 20);
+        }
 
         if (dosJugadores) {
-            moverSerpiente(serpiente2, direccion2);
+            g.setColor(colorJugador2);
+            for (Point p : serpiente2) {
+                g.fillRect(p.x * 20, p.y * 20, 20, 20);
+            }
+        }
+
+        g.setColor(Color.RED);
+        for (Point obstaculo : obstaculos) {
+            g.fillRect(obstaculo.x * 20, obstaculo.y * 20, 20, 20);
+        }
+
+        g.setColor(Color.GREEN);
+        g.fillRect(manzana.x * 20, manzana.y * 20, 20, 20);
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString("P1: " + puntuacion1, 20, 30);
+        if (dosJugadores) {
+            g.drawString("P2: " + puntuacion2, 20, 50);
         }
     }
 
-    private void moverSerpiente(ArrayList<Point> serpiente, String direccion) {
-        Point cabeza = new Point(serpiente.get(0));
-        switch (direccion) {
-            case "W" -> cabeza.y--;
-            case "A" -> cabeza.x--;
-            case "S" -> cabeza.y++;
-            case "D" -> cabeza.x++;
-            case "I" -> cabeza.y--;
-            case "J" -> cabeza.x--;
-            case "K" -> cabeza.y++;
-            case "L" -> cabeza.x++;
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        moverSerpiente(serpiente1, direccion1X, direccion1Y);
+        if (dosJugadores) moverSerpiente(serpiente2, direccion2X, direccion2Y);
+
+        verificarComida(serpiente1, 1);
+        if (dosJugadores) verificarComida(serpiente2, 2);
+
+        verificarColisiones();
+        repaint();
+    }
+
+    private void moverSerpiente(ArrayList<Point> serpiente, int dx, int dy) {
+        Point nuevaCabeza = new Point(serpiente.get(0).x + dx, serpiente.get(0).y + dy);
+
+        // Verificar colisión con los bordes del tablero
+        if (nuevaCabeza.x < 0 || nuevaCabeza.y < 0 || nuevaCabeza.x >= tableroAncho || nuevaCabeza.y >= tableroAlto) {
+            terminarJuego(1); // Terminar el juego si se sale del tablero
+            return;
         }
 
-        serpiente.add(0, cabeza);
+        serpiente.add(0, nuevaCabeza);
         serpiente.remove(serpiente.size() - 1);
     }
 
@@ -164,80 +162,56 @@ public class PanelJuego extends JPanel implements ActionListener, KeyListener {
         if (serpiente.get(0).equals(manzana)) {
             serpiente.add(new Point(manzana));
             generarManzana();
-            if (jugador == 1) {
-                puntuacion1++;
-            } else if (jugador == 2) {
-                puntuacion2++;
-            }
+            generarManzana(); // Aparecen dos nuevas manzanas
+
+            if (jugador == 1) puntuacion1++;
+            if (jugador == 2) puntuacion2++;
         }
     }
 
     private void verificarColisiones() {
-        // Aquí puedes agregar la lógica de colisiones (como si una serpiente choca contra sí misma o un obstáculo)
+        if (colisionConObstaculo(serpiente1.get(0)) || colisionConSerpiente(serpiente1)) terminarJuego(1);
+        if (dosJugadores && (colisionConObstaculo(serpiente2.get(0)) || colisionConSerpiente(serpiente2)))
+            terminarJuego(2);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (jugando) {
-            moverSerpientes();
-            verificarComida(serpiente1, 1);
+    private boolean colisionConObstaculo(Point punto) {
+        return obstaculos.contains(punto);
+    }
 
-            if (dosJugadores) {
-                verificarComida(serpiente2, 2);
-            }
-
-            verificarColisiones();
-            repaint();
+    private boolean colisionConSerpiente(ArrayList<Point> serpiente) {
+        for (int i = 1; i < serpiente.size(); i++) {
+            if (serpiente.get(0).equals(serpiente.get(i))) return true;
         }
+        return false;
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        // Dibujar vidas
-        g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 20));
-        g.drawString("Vidas: " + vidas, getWidth() - 100, 30);
-
-        if (contadorInicial > 0) {
-            g.setColor(Color.WHITE);
-            g.setFont(new Font("Arial", Font.BOLD, 40));
-            g.drawString(String.valueOf(contadorInicial), getWidth() / 2 - 20, getHeight() / 2);
-            return;
-        }
-
-        // Dibujar otros elementos (manzana, serpientes, etc.)
+    private void terminarJuego(int jugador) {
+        jugando = false;
+        timer.stop();
+        String mensaje = jugador == 1 ? "¡Jugador 1 ha perdido!" : "¡Jugador 2 ha perdido!";
+        JOptionPane.showMessageDialog(this, mensaje);
     }
-
-    @Override
-    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
-        if (keyCode == KeyEvent.VK_W && !direccion1.equals("S")) {
-            direccion1 = "W";
-        } else if (keyCode == KeyEvent.VK_A && !direccion1.equals("D")) {
-            direccion1 = "A";
-        } else if (keyCode == KeyEvent.VK_S && !direccion1.equals("W")) {
-            direccion1 = "S";
-        } else if (keyCode == KeyEvent.VK_D && !direccion1.equals("A")) {
-            direccion1 = "D";
-        }
+        if (keyCode == KeyEvent.VK_W && direccion1Y == 0) { direccion1X = 0; direccion1Y = -1; }
+        if (keyCode == KeyEvent.VK_S && direccion1Y == 0) { direccion1X = 0; direccion1Y = 1; }
+        if (keyCode == KeyEvent.VK_A && direccion1X == 0) { direccion1X = -1; direccion1Y = 0; }
+        if (keyCode == KeyEvent.VK_D && direccion1X == 0) { direccion1X = 1; direccion1Y = 0; }
 
-        if (keyCode == KeyEvent.VK_I && !direccion2.equals("S")) {
-            direccion2 = "I";
-        } else if (keyCode == KeyEvent.VK_J && !direccion2.equals("D")) {
-            direccion2 = "J";
-        } else if (keyCode == KeyEvent.VK_K && !direccion2.equals("W")) {
-            direccion2 = "K";
-        } else if (keyCode == KeyEvent.VK_L && !direccion2.equals("A")) {
-            direccion2 = "L";
+        if (dosJugadores) {
+            if (keyCode == KeyEvent.VK_UP && direccion2Y == 0) { direccion2X = 0; direccion2Y = -1; }
+            if (keyCode == KeyEvent.VK_DOWN && direccion2Y == 0) { direccion2X = 0; direccion2Y = 1; }
+            if (keyCode == KeyEvent.VK_LEFT && direccion2X == 0) { direccion2X = -1; direccion2Y = 0; }
+            if (keyCode == KeyEvent.VK_RIGHT && direccion2X == 0) { direccion2X = 1; direccion2Y = 0; }
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {}
-}
 
+    @Override
+    public void keyTyped(KeyEvent e) {}
+}

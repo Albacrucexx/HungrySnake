@@ -1,6 +1,10 @@
 package Principales;
 
 import Menus.MenuPrincipal;
+import Menus.MenuPuntuaciones;
+import Menus.MenuMisiones;
+import Menus.MenuConfiguracionDosJugadores;
+import Menus.MenuConfiguracionUnJugador;
 import Paneles.PanelJuego;
 
 import javax.swing.*;
@@ -8,7 +12,7 @@ import java.awt.*;
 
 public class VentanaPrincipal extends JFrame {
     private CardLayout cardLayout;
-    private JPanel panelContenedor;
+    private JPanel panelPrincipal;
 
     public VentanaPrincipal() {
         setTitle("Juego de la Serpiente");
@@ -16,43 +20,73 @@ public class VentanaPrincipal extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         cardLayout = new CardLayout();
-        panelContenedor = new JPanel(cardLayout);
+        panelPrincipal = new JPanel(cardLayout);
+        add(panelPrincipal);
 
-        // Crear el menú principal
-        MenuPrincipal menuPrincipal = new MenuPrincipal(this); // Aquí pasamos 'this' como VentanaPrincipal
-        panelContenedor.add(menuPrincipal, "MenuPrincipal");
+        // Agregar los paneles al CardLayout
+        MenuPrincipal menuPrincipal = new MenuPrincipal(this);
+        panelPrincipal.add(menuPrincipal, "MenuPrincipal");
 
-        // Crear las pantallas de juego (en este caso, solo una por ahora)
-        PanelJuego panelJuego = new PanelJuego("Jugador 1", "GREEN", "Facil", "", "", false); // Juego 1 jugador por defecto
-        panelContenedor.add(panelJuego, "PanelJuego");
+        // Pasa esta instancia al constructor de MenuConfiguracionUnJugador
+        panelPrincipal.add(new MenuConfiguracionUnJugador(this), "MenuConfiguracionUnJugador");
+        panelPrincipal.add(new MenuConfiguracionDosJugadores(this), "MenuConfiguracionDosJugadores");
+        panelPrincipal.add(new MenuMisiones(), "MenuMisiones");
+        panelPrincipal.add(new MenuPuntuaciones(), "MenuPuntuaciones");
 
-        add(panelContenedor);
-        cardLayout.show(panelContenedor, "MenuPrincipal"); // Mostrar el menú principal primero
+        setVisible(true);
     }
 
-    public void mostrarJuego(String modo) {
-        // Aquí decides si es 1 o 2 jugadores
-        if (modo.equals("Dos Jugadores")) {
-            // Aquí cambias a la pantalla de dos jugadores
-            PanelJuego panelJuegoDosJugadores = new PanelJuego("Jugador 1", "GREEN", "Facil", "Jugador 2", "YELLOW", true);
-            panelContenedor.add(panelJuegoDosJugadores, "PanelJuego");
-            cardLayout.show(panelContenedor, "PanelJuego");
-        } else {
-            // Para un jugador
-            PanelJuego panelJuegoUnJugador = new PanelJuego("Jugador 1", "GREEN", "Facil", "", "", false);
-            panelContenedor.add(panelJuegoUnJugador, "PanelJuego");
-            cardLayout.show(panelContenedor, "PanelJuego");
+    public void iniciarJuegoUnJugador(String colorJugador1) {
+        Color color1 = obtenerColor(colorJugador1);
+        PanelJuego panelJuegoUnJugador = new PanelJuego(false, color1, Color.YELLOW);
+        panelPrincipal.add(panelJuegoUnJugador, "PanelJuegoUnJugador");
+
+        // Actualizar la vista al nuevo panel
+        cardLayout.show(panelPrincipal, "PanelJuegoUnJugador");
+        panelJuegoUnJugador.requestFocusInWindow(); // Dar enfoque al panel
+        panelPrincipal.revalidate();
+        panelPrincipal.repaint();
+    }
+
+    public void iniciarJuegoDosJugadores(String colorJugador1, String colorJugador2) {
+        Color color1 = obtenerColor(colorJugador1);
+        Color color2 = obtenerColor(colorJugador2);
+        PanelJuego panelJuegoDosJugadores = new PanelJuego(true, color1, color2);
+        panelPrincipal.add(panelJuegoDosJugadores, "PanelJuegoDosJugadores");
+
+        // Actualizar la vista al nuevo panel
+        cardLayout.show(panelPrincipal, "PanelJuegoDosJugadores");
+        panelJuegoDosJugadores.requestFocusInWindow(); // Dar enfoque al panel
+        panelPrincipal.revalidate();
+        panelPrincipal.repaint();
+    }
+
+    private Color obtenerColor(String colorStr) {
+        switch (colorStr.toLowerCase()) {
+            case "rojo": return Color.RED;
+            case "verde": return Color.GREEN;
+            case "azul": return Color.BLUE;
+            case "amarillo": return Color.YELLOW;
+            case "cian": return Color.CYAN;
+            case "magenta": return Color.MAGENTA;
+            default: return Color.BLACK;
         }
     }
 
+    public void mostrarJuego(String panelName) {
+        cardLayout.show(panelPrincipal, panelName);
+    }
+
+    public void mostrarMenuMisiones() {
+        mostrarJuego("MenuMisiones");
+    }
+
+    public void mostrarMenuPrincipal() {
+        mostrarJuego("MenuPrincipal");
+    }
+
+    // Método main: Punto de entrada del programa
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            VentanaPrincipal ventana = new VentanaPrincipal();
-            ventana.setVisible(true);
-        });
+        SwingUtilities.invokeLater(() -> new VentanaPrincipal());
     }
 }
-
-
-
-

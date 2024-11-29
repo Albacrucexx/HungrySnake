@@ -13,14 +13,32 @@ public class MissionManager {
         misiones.add(new Mission("Come 5 manzanas seguidas", false, 30));
     }
 
-    public static List<Mission> obtenerMisiones() {
+    public static List<Mission> getMisiones() {
         return misiones;
     }
 
-    public static void verificarMisiones(int puntuacion, int tiempo) {
+    public static void verificarMisiones(int puntuacion, int tiempo, int manzanasSeguidas) {
         for (Mission mision : misiones) {
             if (!mision.isCompletada()) {
-                // Agrega lógica para verificar condiciones según la misión
+                switch (mision.getDescripcion()) {
+                    case "Alcanza 10 puntos en una partida":
+                        if (puntuacion >= 10) {
+                            mision.completar();
+                        }
+                        break;
+                    case "Sobrevive 2 minutos":
+                        if (tiempo >= 120) { // Tiempo en segundos
+                            mision.completar();
+                        }
+                        break;
+                    case "Come 5 manzanas seguidas":
+                        if (manzanasSeguidas >= 5) {
+                            mision.completar();
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
